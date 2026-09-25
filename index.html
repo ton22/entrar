@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecionando para o Bolão da Sorte...</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; background-color: #f4f4f9; color: #333; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        button { background-color: #3498db; color: white; padding: 12px 24px; border: none; border-radius: 50px; font-size: 16px; cursor: pointer; display: none; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h2>Abrindo o Aplicativo...</h2>
+    <p>Se o aplicativo não abrir automaticamente, clique no botão abaixo:</p>
+    <div class="loader" id="loader"></div>
+    <button id="btnAbrir" onclick="redirecionar()">Abrir App</button>
+
+    <script>
+        // 1. Captura o código da URL (ex: ?codigo=BOLAO2980)
+        const urlParams = new URLSearchParams(window.location.search);
+        const codigo = urlParams.get('codigo') || '';
+
+        // 2. Monta o link customizado que seu Android Studio entende
+        const appLink = `bolaodasorte://entrar?codigo=${codigo}`;
+
+        function redirecionar() {
+            window.location.href = appLink;
+        }
+
+        // Tenta abrir o aplicativo automaticamente assim que a página carrega
+        window.onload = function() {
+            redirecionar();
+            
+            // Se o app não abrir em 2 segundos (ex: usuário não tem o app instalado),
+            // esconde a animação de carregamento e mostra o botão manual
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('btnAbrir').style.display = 'inline-block';
+            }, 2000);
+        };
+    </script>
+</body>
+</html>
