@@ -5,41 +5,40 @@ on:
     # Roda todos os dias às 21:15, 22:15 e 23:15 (Horário de Brasília)
     # Em UTC: 00:15, 01:15 e 02:15
     - cron: '15 0,1,2 * * *'
-  workflow_dispatch: # Mantém o botão de testes manuais ativo
+  workflow_dispatch: 
 
 jobs:
   atualizar_banco:
     runs-on: ubuntu-latest
     steps:
-      # Correção 1: Garantir que o curl ignore erros de conexão temporários e mostre o log real (-i)
       - name: Chamar API do Supabase para atualizar a Mega-Sena
         run: |
-          curl -i -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+          curl -i -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
+          -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
+          -H "Authorization: Bearer ${{ vars.SUPABASE_ANON_KEY }}" \
           -H "Content-Type: application/json" \
           -d '{"p_loteria": "megasena"}'
 
       - name: Chamar API do Supabase para atualizar a Lotofácil
         run: |
-          curl -i -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+          curl -i -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
+          -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
+          -H "Authorization: Bearer ${{ vars.SUPABASE_ANON_KEY }}" \
           -H "Content-Type: application/json" \
           -d '{"p_loteria": "lotofacil"}'
 
       - name: Chamar API do Supabase para atualizar a Quina
         run: |
-          curl -i -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+          curl -i -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
+          -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
+          -H "Authorization: Bearer ${{ vars.SUPABASE_ANON_KEY }}" \
           -H "Content-Type: application/json" \
           -d '{"p_loteria": "quina"}'
 
       - name: Chamar API do Supabase para atualizar a Dupla Sena
         run: |
-          curl -i -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
-          -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+          curl -i -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
+          -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
+          -H "Authorization: Bearer ${{ vars.SUPABASE_ANON_KEY }}" \
           -H "Content-Type: application/json" \
           -d '{"p_loteria": "dupla sena"}'
