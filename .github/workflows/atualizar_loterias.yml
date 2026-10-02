@@ -5,41 +5,172 @@ on:
     # Roda todos os dias às 21:15, 22:15 e 23:15 (Horário de Brasília)
     # Em UTC: 00:15, 01:15 e 02:15
     - cron: '15 0,1,2,14,15,16 * * *'
-    #- cron: '15 0,1,2 * * *'
   workflow_dispatch: 
 
 jobs:
   atualizar_banco:
     runs-on: ubuntu-latest
     steps:
-      - name: Chamar API do Supabase para atualizar a Mega-Sena
+      # ========================================================
+      # 1. MEGA-SENA
+      # ========================================================
+      - name: Atualizar Mega-Sena e Notificar
         run: |
-          curl -i -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
-          -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d '{"p_loteria": "megasena"}'
+          CONCURSO_VELHO=$(curl -s "${{ vars.SUPABASE_URL }}/rest/v1/resultados_loterias?select=concurso,loteria&order=id.desc&limit=50" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" | \
+            jq -r '[.[] | select(.loteria // "" | ascii_downcase | contains("mega"))] | .[0].concurso // empty')
 
-      - name: Chamar API do Supabase para atualizar a Lotofácil
-        run: |
-          curl -i -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
-          -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d '{"p_loteria": "lotofacil"}'
+          curl -s -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"p_loteria": "megasena"}'
 
-      - name: Chamar API do Supabase para atualizar a Quina
-        run: |
-          curl -i -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
-          -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d '{"p_loteria": "quina"}'
+          CONCURSO_NOVO=$(curl -s "${{ vars.SUPABASE_URL }}/rest/v1/resultados_loterias?select=concurso,loteria&order=id.desc&limit=50" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" | \
+            jq -r '[.[] | select(.loteria // "" | ascii_downcase | contains("mega"))] | .[0].concurso // empty')
 
-      - name: Chamar API do Supabase para atualizar a Dupla Sena
+          echo "Mega-Sena: Anterior=$CONCURSO_VELHO | Atual=$CONCURSO_NOVO"
+
+          if [ -n "$CONCURSO_NOVO" ] && [ "$CONCURSO_NOVO" != "$CONCURSO_VELHO" ]; then
+            echo "Novo concurso apurado! Disparando push..."
+            curl -s -X POST "${{ vars.SUPABASE_URL }}/functions/v1/send-push-notification" \
+              -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "topic": "resultados_caixa",
+                "title": "🏆 Resultado Oficial Mega-Sena!",
+                "body": "O resultado do Concurso '"$CONCURSO_NOVO"' foi divulgado pela Caixa!",
+                "data": {
+                  "type": "RESULTADO_OFICIAL",
+                  "loteria": "MEGA_SENA",
+                  "concurso": "'"$CONCURSO_NOVO"'"
+                }
+              }'
+          fi
+
+      # ========================================================
+      # 2. LOTOFÁCIL
+      # ========================================================
+      - name: Atualizar Lotofácil e Notificar
         run: |
-          curl -i -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
-          -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d '{"p_loteria": "dupla sena"}'
+          CONCURSO_VELHO=$(curl -s "${{ vars.SUPABASE_URL }}/rest/v1/resultados_loterias?select=concurso,loteria&order=id.desc&limit=50" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" | \
+            jq -r '[.[] | select(.loteria // "" | ascii_downcase | contains("facil"))] | .[0].concurso // empty')
+
+          curl -s -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"p_loteria": "lotofacil"}'
+
+          CONCURSO_NOVO=$(curl -s "${{ vars.SUPABASE_URL }}/rest/v1/resultados_loterias?select=concurso,loteria&order=id.desc&limit=50" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" | \
+            jq -r '[.[] | select(.loteria // "" | ascii_downcase | contains("facil"))] | .[0].concurso // empty')
+
+          echo "Lotofácil: Anterior=$CONCURSO_VELHO | Atual=$CONCURSO_NOVO"
+
+          if [ -n "$CONCURSO_NOVO" ] && [ "$CONCURSO_NOVO" != "$CONCURSO_VELHO" ]; then
+            echo "Novo concurso apurado! Disparando push..."
+            curl -s -X POST "${{ vars.SUPABASE_URL }}/functions/v1/send-push-notification" \
+              -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "topic": "resultados_caixa",
+                "title": "🏆 Resultado Oficial Lotofácil!",
+                "body": "O resultado do Concurso '"$CONCURSO_NOVO"' foi divulgado pela Caixa!",
+                "data": {
+                  "type": "RESULTADO_OFICIAL",
+                  "loteria": "LOTOFACIL",
+                  "concurso": "'"$CONCURSO_NOVO"'"
+                }
+              }'
+          fi
+
+      # ========================================================
+      # 3. QUINA
+      # ========================================================
+      - name: Atualizar Quina e Notificar
+        run: |
+          CONCURSO_VELHO=$(curl -s "${{ vars.SUPABASE_URL }}/rest/v1/resultados_loterias?select=concurso,loteria&order=id.desc&limit=50" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" | \
+            jq -r '[.[] | select(.loteria // "" | ascii_downcase | contains("quina"))] | .[0].concurso // empty')
+
+          curl -s -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"p_loteria": "quina"}'
+
+          CONCURSO_NOVO=$(curl -s "${{ vars.SUPABASE_URL }}/rest/v1/resultados_loterias?select=concurso,loteria&order=id.desc&limit=50" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" | \
+            jq -r '[.[] | select(.loteria // "" | ascii_downcase | contains("quina"))] | .[0].concurso // empty')
+
+          echo "Quina: Anterior=$CONCURSO_VELHO | Atual=$CONCURSO_NOVO"
+
+          if [ -n "$CONCURSO_NOVO" ] && [ "$CONCURSO_NOVO" != "$CONCURSO_VELHO" ]; then
+            echo "Novo concurso apurado! Disparando push..."
+            curl -s -X POST "${{ vars.SUPABASE_URL }}/functions/v1/send-push-notification" \
+              -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "topic": "resultados_caixa",
+                "title": "🏆 Resultado Oficial Quina!",
+                "body": "O resultado do Concurso '"$CONCURSO_NOVO"' foi divulgado pela Caixa!",
+                "data": {
+                  "type": "RESULTADO_OFICIAL",
+                  "loteria": "QUINA",
+                  "concurso": "'"$CONCURSO_NOVO"'"
+                }
+              }'
+          fi
+
+      # ========================================================
+      # 4. DUPLA SENA
+      # ========================================================
+      - name: Atualizar Dupla Sena e Notificar
+        run: |
+          CONCURSO_VELHO=$(curl -s "${{ vars.SUPABASE_URL }}/rest/v1/resultados_loterias?select=concurso,loteria&order=id.desc&limit=50" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" | \
+            jq -r '[.[] | select(.loteria // "" | ascii_downcase | contains("dupla"))] | .[0].concurso // empty')
+
+          curl -s -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"p_loteria": "dupla sena"}'
+
+          CONCURSO_NOVO=$(curl -s "${{ vars.SUPABASE_URL }}/rest/v1/resultados_loterias?select=concurso,loteria&order=id.desc&limit=50" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" | \
+            jq -r '[.[] | select(.loteria // "" | ascii_downcase | contains("dupla"))] | .[0].concurso // empty')
+
+          echo "Dupla Sena: Anterior=$CONCURSO_VELHO | Atual=$CONCURSO_NOVO"
+
+          if [ -n "$CONCURSO_NOVO" ] && [ "$CONCURSO_NOVO" != "$CONCURSO_VELHO" ]; then
+            echo "Novo concurso apurado! Disparando push..."
+            curl -s -X POST "${{ vars.SUPABASE_URL }}/functions/v1/send-push-notification" \
+              -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "topic": "resultados_caixa",
+                "title": "🏆 Resultado Oficial Dupla Sena!",
+                "body": "O resultado do Concurso '"$CONCURSO_NOVO"' foi divulgado pela Caixa!",
+                "data": {
+                  "type": "RESULTADO_OFICIAL",
+                  "loteria": "DUPLA_SENA",
+                  "concurso": "'"$CONCURSO_NOVO"'"
+                }
+              }'
+          fi
