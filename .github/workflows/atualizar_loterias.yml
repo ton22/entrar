@@ -15,31 +15,31 @@ jobs:
       - name: Chamar API do Supabase para atualizar a Mega-Sena
         run: |
           curl -i -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
-          -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ vars.SUPABASE_ANON_KEY }}" \
+          -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
           -H "Content-Type: application/json" \
           -d '{"p_loteria": "megasena"}'
 
       - name: Chamar API do Supabase para atualizar a Lotofácil
         run: |
           curl -i -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
-          -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ vars.SUPABASE_ANON_KEY }}" \
+          -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
           -H "Content-Type: application/json" \
           -d '{"p_loteria": "lotofacil"}'
 
       - name: Chamar API do Supabase para atualizar a Quina
         run: |
           curl -i -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
-          -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ vars.SUPABASE_ANON_KEY }}" \
+          -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
           -H "Content-Type: application/json" \
           -d '{"p_loteria": "quina"}'
 
       - name: Chamar API do Supabase para atualizar a Dupla Sena
         run: |
           curl -i -X POST "${{ vars.SUPABASE_URL }}/rest/v1/rpc/obter_loterias_v6_producao" \
-          -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
-          -H "Authorization: Bearer ${{ vars.SUPABASE_ANON_KEY }}" \
+          -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+          -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
           -H "Content-Type: application/json" \
           -d '{"p_loteria": "dupla sena"}'
