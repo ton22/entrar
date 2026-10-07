@@ -1,0 +1,31 @@
+name: Automação Mega-Sena
+
+on:
+  schedule:
+    - cron: '15 0,1,2,3,14,15,16 * * *'
+  workflow_dispatch:
+
+jobs:
+  atualizar_mega:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verificar flag Mega-Sena
+        run: |
+          HOJE=$(date -u +"%Y-%m-%d")
+          ATUALIZADO=$(curl -s "${{ vars.SUPABASE_URL }}/rest/v1/flags?select=data&loteria=eq.mega&data=eq.$HOJE" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+          if [ -n "$ATUALIZADO" ]; then
+            echo "Mega-Sena já atualizada hoje ($HOJE). Encerrando job."
+            exit 0
+          fi
+
+      - name: Atualizar Mega-Sena e Notificar
+        run: |
+          HOJE=$(date -u +"%Y-%m-%d")
+          # ... lógica de consulta e push
+          curl -s -X POST "${{ vars.SUPABASE_URL }}/rest/v1/flags" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"loteria":"mega","data":"'"$HOJE"'"}'
