@@ -36,29 +36,21 @@ jobs:
           echo "Mega-Sena: Anterior=$CONCURSO_VELHO | Atual=$CONCURSO_NOVO"
 
           if [ -n "$CONCURSO_NOVO" ] && [ "$CONCURSO_NOVO" != "$CONCURSO_VELHO" ]; then
-            TEM_BOLAO=$(curl -s "${{ vars.SUPABASE_URL }}/rest/v1/pools?select=id&modality=ilike.*mega*&status=in.(READY_FOR_DRAW,WAITING_PAYMENTS)&limit=1" \
+            echo "Novo concurso apurado! Disparando push para resultado_megasena..."
+            curl -s -X POST "${{ vars.SUPABASE_URL }}/functions/v1/send-push-notification" \
               -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" | jq 'length')
-
-            if [ "$TEM_BOLAO" -gt 0 ]; then
-              echo "Novo concurso apurado com bolões ativos! Disparando push para resultado_megasena..."
-              curl -s -X POST "${{ vars.SUPABASE_URL }}/functions/v1/send-push-notification" \
-                -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-                -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-                -H "Content-Type: application/json" \
-                -d '{
-                  "topic": "resultado_megasena",
-                  "title": "🎉 Resultado Oficial Mega-Sena!",
-                  "body": "O resultado do Concurso '"$CONCURSO_NOVO"' foi divulgado pela Caixa!",
-                  "data": {
-                    "type": "RESULTADO_OFICIAL",
-                    "loteria": "MEGA_SENA",
-                    "concurso": "'"$CONCURSO_NOVO"'"
-                  }
-                }'
-            else
-              echo "Concurso atualizado, mas nenhum bolão ativo de Mega-Sena encontrado. Push omitido."
-            fi
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "topic": "resultado_megasena",
+                "title": "🎉 Resultado Oficial Mega-Sena!",
+                "body": "O resultado do Concurso '"$CONCURSO_NOVO"' foi divulgado pela Caixa!",
+                "data": {
+                  "type": "RESULTADO_OFICIAL",
+                  "loteria": "MEGA_SENA",
+                  "concurso": "'"$CONCURSO_NOVO"'"
+                }
+              }'
           fi
 
       # ========================================================
@@ -85,29 +77,21 @@ jobs:
           echo "Lotofácil: Anterior=$CONCURSO_VELHO | Atual=$CONCURSO_NOVO"
 
           if [ -n "$CONCURSO_NOVO" ] && [ "$CONCURSO_NOVO" != "$CONCURSO_VELHO" ]; then
-            TEM_BOLAO=$(curl -s "${{ vars.SUPABASE_URL }}/rest/v1/pools?select=id&modality=ilike.*facil*&status=in.(READY_FOR_DRAW,WAITING_PAYMENTS)&limit=1" \
+            echo "Novo concurso apurado! Disparando push para resultado_lotofacil..."
+            curl -s -X POST "${{ vars.SUPABASE_URL }}/functions/v1/send-push-notification" \
               -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" | jq 'length')
-
-            if [ "$TEM_BOLAO" -gt 0 ]; then
-              echo "Novo concurso apurado com bolões ativos! Disparando push para resultado_lotofacil..."
-              curl -s -X POST "${{ vars.SUPABASE_URL }}/functions/v1/send-push-notification" \
-                -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-                -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-                -H "Content-Type: application/json" \
-                -d '{
-                  "topic": "resultado_lotofacil",
-                  "title": "🎉 Resultado Oficial Lotofácil!",
-                  "body": "O resultado do Concurso '"$CONCURSO_NOVO"' foi divulgado pela Caixa!",
-                  "data": {
-                    "type": "RESULTADO_OFICIAL",
-                    "loteria": "LOTOFACIL",
-                    "concurso": "'"$CONCURSO_NOVO"'"
-                  }
-                }'
-            else
-              echo "Concurso atualizado, mas nenhum bolão ativo de Lotofácil encontrado. Push omitido."
-            fi
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "topic": "resultado_lotofacil",
+                "title": "🎉 Resultado Oficial Lotofácil!",
+                "body": "O resultado do Concurso '"$CONCURSO_NOVO"' foi divulgado pela Caixa!",
+                "data": {
+                  "type": "RESULTADO_OFICIAL",
+                  "loteria": "LOTOFACIL",
+                  "concurso": "'"$CONCURSO_NOVO"'"
+                }
+              }'
           fi
 
       # ========================================================
@@ -134,29 +118,21 @@ jobs:
           echo "Quina: Anterior=$CONCURSO_VELHO | Atual=$CONCURSO_NOVO"
 
           if [ -n "$CONCURSO_NOVO" ] && [ "$CONCURSO_NOVO" != "$CONCURSO_VELHO" ]; then
-            TEM_BOLAO=$(curl -s "${{ vars.SUPABASE_URL }}/rest/v1/pools?select=id&modality=ilike.*quina*&status=in.(READY_FOR_DRAW,WAITING_PAYMENTS)&limit=1" \
+            echo "Novo concurso apurado! Disparando push para resultado_quina..."
+            curl -s -X POST "${{ vars.SUPABASE_URL }}/functions/v1/send-push-notification" \
               -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" | jq 'length')
-
-            if [ "$TEM_BOLAO" -gt 0 ]; then
-              echo "Novo concurso apurado com bolões ativos! Disparando push para resultado_quina..."
-              curl -s -X POST "${{ vars.SUPABASE_URL }}/functions/v1/send-push-notification" \
-                -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-                -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-                -H "Content-Type: application/json" \
-                -d '{
-                  "topic": "resultado_quina",
-                  "title": "🎉 Resultado Oficial Quina!",
-                  "body": "O resultado do Concurso '"$CONCURSO_NOVO"' foi divulgado pela Caixa!",
-                  "data": {
-                    "type": "RESULTADO_OFICIAL",
-                    "loteria": "QUINA",
-                    "concurso": "'"$CONCURSO_NOVO"'"
-                  }
-                }'
-            else
-              echo "Concurso atualizado, mas nenhum bolão ativo de Quina encontrado. Push omitido."
-            fi
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "topic": "resultado_quina",
+                "title": "🎉 Resultado Oficial Quina!",
+                "body": "O resultado do Concurso '"$CONCURSO_NOVO"' foi divulgado pela Caixa!",
+                "data": {
+                  "type": "RESULTADO_OFICIAL",
+                  "loteria": "QUINA",
+                  "concurso": "'"$CONCURSO_NOVO"'"
+                }
+              }'
           fi
 
       # ========================================================
@@ -183,27 +159,19 @@ jobs:
           echo "Dupla Sena: Anterior=$CONCURSO_VELHO | Atual=$CONCURSO_NOVO"
 
           if [ -n "$CONCURSO_NOVO" ] && [ "$CONCURSO_NOVO" != "$CONCURSO_VELHO" ]; then
-            TEM_BOLAO=$(curl -s "${{ vars.SUPABASE_URL }}/rest/v1/pools?select=id&modality=ilike.*dupla*&status=in.(READY_FOR_DRAW,WAITING_PAYMENTS)&limit=1" \
+            echo "Novo concurso apurado! Disparando push para resultado_duplasena..."
+            curl -s -X POST "${{ vars.SUPABASE_URL }}/functions/v1/send-push-notification" \
               -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" | jq 'length')
-
-            if [ "$TEM_BOLAO" -gt 0 ]; then
-              echo "Novo concurso apurado com bolões ativos! Disparando push para resultado_duplasena..."
-              curl -s -X POST "${{ vars.SUPABASE_URL }}/functions/v1/send-push-notification" \
-                -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-                -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-                -H "Content-Type: application/json" \
-                -d '{
-                  "topic": "resultado_duplasena",
-                  "title": "🎉 Resultado Oficial Dupla Sena!",
-                  "body": "O resultado do Concurso '"$CONCURSO_NOVO"' foi divulgado pela Caixa!",
-                  "data": {
-                    "type": "RESULTADO_OFICIAL",
-                    "loteria": "DUPLA_SENA",
-                    "concurso": "'"$CONCURSO_NOVO"'"
-                  }
-                }'
-            else
-              echo "Concurso atualizado, mas nenhum bolão ativo de Dupla Sena encontrado. Push omitido."
-            fi
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "topic": "resultado_duplasena",
+                "title": "🎉 Resultado Oficial Dupla Sena!",
+                "body": "O resultado do Concurso '"$CONCURSO_NOVO"' foi divulgado pela Caixa!",
+                "data": {
+                  "type": "RESULTADO_OFICIAL",
+                  "loteria": "DUPLA_SENA",
+                  "concurso": "'"$CONCURSO_NOVO"'"
+                }
+              }'
           fi
